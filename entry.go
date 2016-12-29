@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
+	"reflect"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -39,6 +43,9 @@ type Entry struct {
 
 	// Message passed to Debug, Info, Warn, Error, Fatal or Panic
 	Message string
+
+	File string
+	line int
 
 	// When formatter is called in entry.log(), an Buffer may be set to entry
 	Buffer *bytes.Buffer
@@ -92,6 +99,26 @@ func (entry Entry) log(level Level, msg string) {
 	entry.Time = time.Now()
 	entry.Level = level
 	entry.Message = msg
+
+	if entry.Logger.EnableCallFunc {
+		skip := 2
+		pkgName := reflect.TypeOf(entry).PkgPath()
+		for {
+			_, file, line, ok := runtime.Caller(skip)
+			if !ok {
+				file = "???"
+				line = 0
+				break
+			}
+			if !strings.Contains(file, pkgName) {
+				_, filename := path.Split(file)
+				entry.File = filename
+				entry.line = line
+				break
+			}
+			skip++
+		}
+	}
 
 	if err := entry.Logger.Hooks.Fire(level, &entry); err != nil {
 		entry.Logger.mu.Lock()

@@ -1,15 +1,17 @@
 package main
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/heramerom/logrus"
 )
 
 var log = logrus.New()
 
 func init() {
 	log.Formatter = new(logrus.JSONFormatter)
-	log.Formatter = new(logrus.TextFormatter) // default
+	log.Formatter = new(logrus.TextFormatter)
+	log.Formatter = new(logrus.PlainFormatter) // default
 	log.Level = logrus.DebugLevel
+	log.EnableCallFunc = false
 }
 
 func main() {

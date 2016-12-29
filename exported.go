@@ -13,6 +13,12 @@ func StandardLogger() *Logger {
 	return std
 }
 
+func SetEnableCallFunc(enable bool) {
+	std.mu.Lock()
+	defer std.mu.Unlock()
+	std.EnableCallFunc = enable
+}
+
 // SetOutput sets the standard logger output.
 func SetOutput(out io.Writer) {
 	std.mu.Lock()
